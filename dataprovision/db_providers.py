@@ -8,12 +8,13 @@ class DbDataProvider(object):
         self.cur = self.con.cursor()
 
     def get_type_eqs_by_time(self, time):
-        query = """ select t.nazwa_typu, count(*)
-                    from typurzadzenia t join
-                    urzadzenia u on t.TypUrzadzenia_idTUr = u.idTUr join
-                    Z_U zu on zu.Urzadzenie_TypUrzadzenia_idTUr = u.idTUr  join
-                    Zabieg z on zu.Zabieg_idZ = z.idZ
-                    where day(z.date_) >= """ + str(time) + "group by t.nazwa_typu"
+        query = """select tu.nazwa_typu, count(*)
+                   from typurzadzenia tu join
+                   urzadzenie u on tu.idTUr = u.TypUrzadzenia_idTUr join
+                   zaburz zu on zu.urzadzenie_idUr = u.idUr  join
+                   Zabieg z on zu.Zabieg_idZ = z.idZ
+                   where (select trunc(sysdate - z.koniec) as days from dual) <=
+                   """ + str(time) +  "group by tu.nazwa_typu";
         self.cur.execute(query)
         return self.cur.fetchall()
 
@@ -74,3 +75,4 @@ if __name__ == "__main__":
     print(provider.get_eq_providers_with_eq("stroboskop"))
     print(provider.get_eq_providers_with_eq("Kardiogram"))
     print(provider.get_rooms_with_type())
+    print(provider.get_type_eqs_by_time(3))
