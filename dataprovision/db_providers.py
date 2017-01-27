@@ -1,5 +1,4 @@
 import cx_Oracle
-from time import gmtime, strftime
 from datetime import datetime
 
 class DbDataProvider(object):
@@ -48,8 +47,9 @@ class DbDataProvider(object):
         self.cur.execute(query)
         return self.cur.fetchall()
 
-    def check_collision(self, employer_id, room_id, day):
-        date_w = datetime.strptime("2000-10-10 " + strftime("%H:%M:%S", gmtime()), "%Y-%m-%d %H:%M:%S")
+    def check_collision(self, employer_id, room_id, begin_h, end_h, day):
+        begin_h_t = datetime.strptime("2000-10-10 " + begin_h, "%Y-%m-%d %H:%M:%S")
+        end_h_t = datetime.strptime("2000-10-10 " + end_h, "%Y-%m-%d %H:%M:%S")
         query_employer = """select t.dzien_tygodnia, t.poczatek, t.koniec from
                             pracownik p left join
                             terminprzyjec t on p.pesel = t.pracownik_pesel
@@ -64,9 +64,11 @@ class DbDataProvider(object):
         room_col = self.cur.fetchall()
         for dates in empl_col + room_col:
             if dates[1] is None and dates[2] is None:
+                self._add_term_visit(employer_id, day, begin_h, end_h, room_id)
                 return True
-            if not dates[1] < date_w < dates[2] and day == dates[0]:
+            if ((dates[1] < begin_h_t < dates[2]) or (dates[1] < end_h_t < dates[2])) and day == dates[0]:
                 return False
+        self._add_term_visit(employer_id, day, begin_h, end_h, room_id)
         return True
 
     def get_rooms_with_type(self):
@@ -75,7 +77,7 @@ class DbDataProvider(object):
         self.cur.execute(query)
         return self.cur.fetchall()
 
-    def add_term_visit(self, employer_pesel, weekday, start_h, end_h, room_id):
+    def _add_term_visit(self, employer_pesel, weekday, start_h, end_h, room_id):
         query = "insert into terminprzyjec (pracownik_pesel, dzien_tygodnia, " + \
                 "poczatek, koniec, gabinet_idgab) values (" + \
                 str(employer_pesel) + ",'" + weekday + "'," + \
@@ -96,4 +98,4 @@ if __name__ == "__main__":
     print(provider.get_type_eqs_by_time(3))
     # provider.add_eq(1)
     # provider.add_term_visit(95102812345, "pon", "11:00:00", "12:00:00", 1)
-    print(provider.check_collision(95102812345, 1, "pon"))
+    print(provider.check_collision(95102812345, 1, "11:30:00", "11:45:00", "pon"))
