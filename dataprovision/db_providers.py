@@ -1,4 +1,5 @@
 import cx_Oracle
+from time import gmtime, strftime
 from datetime import datetime
 
 class DbDataProvider(object):
@@ -8,13 +9,13 @@ class DbDataProvider(object):
         self.cur = self.con.cursor()
 
     def get_type_eqs_by_time(self, time):
-        query = """select tu.nazwa_typu, count(*)
+        query = """select tu.idtur, tu.nazwa_typu, count(*)
                    from typurzadzenia tu join
                    urzadzenie u on tu.idTUr = u.TypUrzadzenia_idTUr join
                    zaburz zu on zu.urzadzenie_idUr = u.idUr  join
                    Zabieg z on zu.Zabieg_idZ = z.idZ
                    where (select trunc(sysdate - z.koniec) as days from dual) <=
-                   """ + str(time) +  "group by tu.nazwa_typu";
+                   """ + str(time) + "group by tu.nazwa_typu, tu.idtur"
         self.cur.execute(query)
         return self.cur.fetchall()
 
@@ -46,30 +47,29 @@ class DbDataProvider(object):
         self.cur.execute(query)
         return self.cur.fetchall()
 
-    def check_collision(self, employer_id, room_id, date_w):
-        query_employer = """select w.poczatek, w.koniec from
+    def check_collision(self, employer_id, room_id, day):
+        date_w = datetime.strptime("2000-10-10 " + strftime("%H:%M:%S", gmtime()), "%Y-%m-%d %H:%M:%S")
+        query_employer = """select t.dzien_tygodnia, t.poczatek, t.koniec from
                             pracownik p left join
                             terminprzyjec t on p.pesel = t.pracownik_pesel
-                            left join wizyta w on w.TerminPrzyjec_idTP=t.idtp
                             where p.pesel= """ + str(employer_id)
         self.cur.execute(query_employer)
         empl_col = self.cur.fetchall()
-        query_room = """select w.poczatek, w.koniec from
+        query_room = """select t.dzien_tygodnia, t.poczatek, t.koniec from
                         gabinet g left join
                         terminprzyjec t on g.idgab = t.gabinet_idgab
-                        left join wizyta w on w.TerminPrzyjec_idTP=t.idtp
                         where idGab = """ + str(room_id)
         self.cur.execute(query_room)
         room_col = self.cur.fetchall()
         for dates in empl_col + room_col:
-            if dates[0] is None and dates[0] is None:
+            if dates[1] is None and dates[2] is None:
                 return True
-            if not  dates[0] < date_w < dates[1]:
+            if not dates[1] < date_w < dates[2] and day == dates[0]:
                 return False
         return True
 
     def get_rooms_with_type(self):
-        query = """select g.nr_pietra, g.nr_pokoju, t.nazwa_rodzaju_gabinetu from gabinet g
+        query = """select g.idGab, g.nr_pietra, g.nr_pokoju, t.nazwa_rodzaju_gabinetu from gabinet g
                    left join typgabinetu t on g.TypGabinetu_idTGab = t.idtgab"""
         self.cur.execute(query)
         return self.cur.fetchall()
@@ -94,4 +94,4 @@ if __name__ == "__main__":
     print(provider.get_type_eqs_by_time(3))
     # provider.add_eq(1)
     # provider.add_term_visit(95102812345, "pon", "11:00:00", "12:00:00", 1)
-    print(provider.check_collision(95102812345, 1, datetime.strptime("2000-10-10 10:00:00", "%Y-%m-%d %H:%M:%S")))
+    print(provider.check_collision(95102812345, 1, "pon"))
