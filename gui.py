@@ -44,10 +44,10 @@ class GuiApp(gtk.Window):
         self.vb = gtk.VBox(False, 2)
         self.vb.pack_start(mb, False, False, 0)
 
-        self.initial_buttons = {'Zaplanuj operacje': self.list_docs, 'Kup urzadzenie': self.enter_days}
+        self.initial_buttons = {'Zaplanuj terminarz': self.list_docs, 'Kup urzadzenie': self.enter_days}
         self.vbox = gtk.VButtonBox()
         self.add_buttons(self.initial_buttons)
-        self.set_size_request(500, 200)
+        self.set_size_request(650, 250)
 
     def add_buttons(self, blist):
         #self.vbox = gtk.VButtonBox()
