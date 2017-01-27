@@ -16,6 +16,7 @@ class DbDataProvider(object):
                    Zabieg z on zu.Zabieg_idZ = z.idZ
                    where (select trunc(sysdate - z.koniec) as days from dual) <=
                    """ + str(time) + "group by tu.nazwa_typu, tu.idtur"
+
         self.cur.execute(query)
         return self.cur.fetchall()
 
@@ -91,6 +92,7 @@ if __name__ == "__main__":
     print(provider.get_eq_providers_with_eq("stroboskop"))
     print(provider.get_eq_providers_with_eq("Kardiogram"))
     print(provider.get_rooms_with_type())
+
     print(provider.get_type_eqs_by_time(3))
     # provider.add_eq(1)
     # provider.add_term_visit(95102812345, "pon", "11:00:00", "12:00:00", 1)
