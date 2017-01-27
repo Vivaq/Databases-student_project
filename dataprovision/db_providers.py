@@ -64,11 +64,12 @@ class DbDataProvider(object):
         room_col = self.cur.fetchall()
         for dates in empl_col + room_col:
             if dates[1] is None and dates[2] is None:
-                self._add_term_visit(employer_id, day, begin_h, end_h, room_id)
-                return True
-            if ((dates[1] < begin_h_t < dates[2]) or (dates[1] < end_h_t < dates[2])) and day == dates[0]:
+                continue
+            if ((dates[1] < begin_h_t < dates[2]) or (dates[1] < end_h_t < dates[2]))\
+                    and day == dates[0]:
                 return False
-            if ((begin_h_t < dates[1] < end_h_t) or (begin_h_t < dates[2] < end_h_t)) and day == dates[0]:
+            if ((begin_h_t < dates[1] < end_h_t) or (begin_h_t < dates[2] < end_h_t)) \
+                    and day == dates[0]:
                 return False
         self._add_term_visit(employer_id, day, begin_h, end_h, room_id)
         return True
@@ -100,4 +101,4 @@ if __name__ == "__main__":
     print(provider.get_type_eqs_by_time(3))
     # provider.add_eq(1)
     # provider.add_term_visit(95102812345, "pon", "11:00:00", "12:00:00", 1)
-    print(provider.check_collision(95102812345, 1, "11:30:00", "11:45:00", "pon"))
+    print(provider.check_collision(95102812345, 1, "10:00:00", "12:00:00", "pon"))
