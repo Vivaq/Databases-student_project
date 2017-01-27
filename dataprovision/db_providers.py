@@ -1,5 +1,5 @@
 import cx_Oracle
-
+from datetime import datetime
 
 class DbDataProvider(object):
     def __init__(self, db_address="ora3.elka.pw.edu.pl", username="kmagryta", passw="kmagryta"):
@@ -46,16 +46,26 @@ class DbDataProvider(object):
         self.cur.execute(query)
         return self.cur.fetchall()
 
-    def check_collision(self, employer_id, room_id):
-        query_employer = """select t.dzientygodnia, t.poczatek, t.koniec from
-                            pracownik p where pesel=""" + employer_id + """left join
-                            terminprzyjec t on p.idprac = t.pracownik_idprac"""
-        empl_col = self.cur.execute(query_employer)
-        query_room = """select t.dzientygodnia, t.poczatek, t.koniec from
-                        gabinet g where idGab = """ + room_id + """ left join
-                        terminprzyjec t on p.idgab = t.gabinet_idgab"""
+    def check_collision(self, employer_id, room_id, date_w):
+        query_employer = """select w.poczatek, w.koniec from
+                            pracownik p left join
+                            terminprzyjec t on p.pesel = t.pracownik_pesel
+                            left join wizyta w on w.TerminPrzyjec_idTP=t.idtp
+                            where p.pesel= """ + str(employer_id)
+        self.cur.execute(query_employer)
+        empl_col = self.cur.fetchall()
+        query_room = """select w.poczatek, w.koniec from
+                        gabinet g left join
+                        terminprzyjec t on g.idgab = t.gabinet_idgab
+                        left join wizyta w on w.TerminPrzyjec_idTP=t.idtp
+                        where idGab = """ + str(room_id)
+        self.cur.execute(query_room)
         room_col = self.cur.fetchall()
-        # TODO - Alghorithm.
+        for dates in empl_col + room_col:
+            if dates[0] is None and dates[0] is None:
+                return True
+            if not  dates[0] < date_w < dates[1]:
+                return False
         return True
 
     def get_rooms_with_type(self):
@@ -76,11 +86,12 @@ class DbDataProvider(object):
 
 if __name__ == "__main__":
     provider = DbDataProvider()
-    # print(provider.get_doctors_with_type())
-    # print(provider.get_pref_hours_doctor(95102812345))
-    # print(provider.get_eq_providers_with_eq("stroboskop"))
-    # print(provider.get_eq_providers_with_eq("Kardiogram"))
-    # print(provider.get_rooms_with_type())
-    # print(provider.get_type_eqs_by_time(3))
+    print(provider.get_doctors_with_type())
+    print(provider.get_pref_hours_doctor(95102812345))
+    print(provider.get_eq_providers_with_eq("stroboskop"))
+    print(provider.get_eq_providers_with_eq("Kardiogram"))
+    print(provider.get_rooms_with_type())
+    print(provider.get_type_eqs_by_time(3))
     # provider.add_eq(1)
-    provider.add_term_visit(95102812345, "pon", "11:00:00", "12:00:00", 1)
+    # provider.add_term_visit(95102812345, "pon", "11:00:00", "12:00:00", 1)
+    print(provider.check_collision(95102812345, 1, datetime.strptime("2000-10-10 10:00:00", "%Y-%m-%d %H:%M:%S")))
