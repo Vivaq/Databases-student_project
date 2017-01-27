@@ -27,9 +27,10 @@ class DbDataProvider(object):
         return self.cur.fetchall()
 
     def add_eq(self, eq_type_id):
-        query = """INSERT INTO "KMAGRYTA"."URZADZENIE" (DATA_ZAKUPU, TYPURZADZENIA_IDTUR)
-                   VALUES (sysdate, """ + str(eq_type_id) + ")"
+        query = """insert into urzadzenie (data_zakupu, typurzadzenia_idtur)
+                   values (sysdate, """ + str(eq_type_id) + ")"
         self.cur.execute(query)
+        self.con.commit()
 
     def get_doctors_with_type(self):
         query = """select p.pesel, p.nazwisko, t.specjalizacja from
@@ -63,17 +64,23 @@ class DbDataProvider(object):
         self.cur.execute(query)
         return self.cur.fetchall()
 
-    def add_term_visit(self, employer_id, weekday, next_, start_h, end_h):
-        query = "insert into terminprzyjec values (" + employer_id + ","  + weekday + "," + next_+ "," + \
-        "," + start_h + "," + end_h + ")"
+    def add_term_visit(self, employer_pesel, weekday, start_h, end_h, room_id):
+        query = "insert into terminprzyjec (pracownik_pesel, dzien_tygodnia, " + \
+                "poczatek, koniec, gabinet_idgab) values (" + \
+                str(employer_pesel) + ",'" + weekday + "'," + \
+                "TO_DATE('2000-10-10 " + start_h + "', 'YYYY-MM-DD HH24:MI:SS'), " + \
+                "TO_DATE('2000-10-10 " + end_h + "', 'YYYY-MM-DD HH24:MI:SS'), " + str(room_id) + ")"
+        print(query)
         self.cur.execute(query)
+        self.con.commit()
 
 if __name__ == "__main__":
     provider = DbDataProvider()
-    print(provider.get_doctors_with_type())
-    print(provider.get_pref_hours_doctor(95102812345))
-    print(provider.get_eq_providers_with_eq("stroboskop"))
-    print(provider.get_eq_providers_with_eq("Kardiogram"))
-    print(provider.get_rooms_with_type())
-    print(provider.get_type_eqs_by_time(3))
-    provider.add_eq(1)
+    # print(provider.get_doctors_with_type())
+    # print(provider.get_pref_hours_doctor(95102812345))
+    # print(provider.get_eq_providers_with_eq("stroboskop"))
+    # print(provider.get_eq_providers_with_eq("Kardiogram"))
+    # print(provider.get_rooms_with_type())
+    # print(provider.get_type_eqs_by_time(3))
+    # provider.add_eq(1)
+    provider.add_term_visit(95102812345, "pon", "11:00:00", "12:00:00", 1)
