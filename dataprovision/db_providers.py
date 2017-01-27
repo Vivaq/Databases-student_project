@@ -68,6 +68,8 @@ class DbDataProvider(object):
                 return True
             if ((dates[1] < begin_h_t < dates[2]) or (dates[1] < end_h_t < dates[2])) and day == dates[0]:
                 return False
+            if ((begin_h_t < dates[1] < end_h_t) or (begin_h_t < dates[2] < end_h_t)) and day == dates[0]:
+                return False
         self._add_term_visit(employer_id, day, begin_h, end_h, room_id)
         return True
 
