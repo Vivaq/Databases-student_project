@@ -119,7 +119,7 @@ class GuiApp(gtk.Window):
         self.vbox = gtk.VButtonBox()
         d = {}
         for x in db_conn.get_rooms_with_type():
-            x = str(x[0]) + ' ' + str(x[1]) + ' ' + x[2] + ' ' + str(x[3])
+            x = str(x[0]) + ' ' + str(x[1]) + ' ' + str(x[2]) + ' ' + str(x[3])
             d[x] = self.show_days
         self.add_buttons(d)
 
@@ -175,13 +175,12 @@ class GuiApp(gtk.Window):
         self.vb.remove(self.vbox)
         self.remove(self.vb)
         self.vbox = gtk.VButtonBox()
-        if db_conn.check_collision(int(plan_list['doc'].split(' ')[2]), plan_list['room'].split(' ')[0], plan_list['day']):
-            db_conn.add_term_visit(int(plan_list['doc'].split(' ')[2]),
-                                   plan_list['day'],
+        if db_conn.check_collision(int(plan_list['doc'].split(' ')[2]),
+                                   plan_list['room'].split(' ')[0],
                                    plan_list['start_h'],
                                    plan_list['end_h'],
-                                   plan_list['room'].split(' ')[0]
-                                   )
+                                   plan_list['day']
+                                   ):
             self.add_buttons({'Powodzenie!': self.go_back})
         else:
 
