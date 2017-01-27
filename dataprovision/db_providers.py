@@ -64,7 +64,7 @@ class DbDataProvider(object):
         for dates in empl_col + room_col:
             if dates[0] is None and dates[0] is None:
                 return True
-            if not  dates[0] < date_w < dates[1]:
+            if not dates[0] < date_w < dates[1]:
                 return False
         return True
 
