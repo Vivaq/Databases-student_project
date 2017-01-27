@@ -47,7 +47,7 @@ class GuiApp(gtk.Window):
         self.initial_buttons = {'Zaplanuj terminarz': self.list_docs, 'Kup urzadzenie': self.enter_days}
         self.vbox = gtk.VButtonBox()
         self.add_buttons(self.initial_buttons)
-        self.set_size_request(650, 250)
+        self.set_size_request(620, 250)
 
     def add_buttons(self, blist):
         #self.vbox = gtk.VButtonBox()
@@ -79,7 +79,7 @@ class GuiApp(gtk.Window):
         self.vbox = gtk.VButtonBox()
         d = {}
         for x in db_conn.get_type_eqs_by_time(days_num):
-            x = str(x[0]) + ' ' + str(x[1])
+            x = str(x[0]) + ' ' + str(x[1]) + ' uzyto: ' + str(x[2]) + ' razy'
             d[x] = self.suppliers
         self.add_buttons(d)
 
@@ -90,7 +90,7 @@ class GuiApp(gtk.Window):
         self.vbox = gtk.VButtonBox()
         d = {}
         for x in db_conn.get_eq_providers_with_eq(buy_list['type'].split(' ')[1]):
-            x = x[1] + ' ' + str(x[2])
+            x = x[1] + ' ' + str(x[2]) + ' cena: ' + str(x[3])
             d[x] = self.finalize
         self.add_buttons(d)
 
