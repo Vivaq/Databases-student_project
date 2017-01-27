@@ -8,13 +8,13 @@ class DbDataProvider(object):
         self.cur = self.con.cursor()
 
     def get_type_eqs_by_time(self, time):
-        query = """select tu.nazwa_typu, count(*)
+        query = """select tu.idtur, tu.nazwa_typu, count(*)
                    from typurzadzenia tu join
                    urzadzenie u on tu.idTUr = u.TypUrzadzenia_idTUr join
                    zaburz zu on zu.urzadzenie_idUr = u.idUr  join
                    Zabieg z on zu.Zabieg_idZ = z.idZ
                    where (select trunc(sysdate - z.koniec) as days from dual) <=
-                   """ + str(time) +  "group by tu.nazwa_typu";
+                   """ + str(time) +  "group by tu.nazwa_typu, tu.idtur";
         self.cur.execute(query)
         return self.cur.fetchall()
 
@@ -46,7 +46,7 @@ class DbDataProvider(object):
         self.cur.execute(query)
         return self.cur.fetchall()
 
-    def check_collision(self, employer_id, room_id, date_w):
+    def check_collision(self, employer_id, room_id):
         query_employer = """select w.poczatek, w.koniec from
                             pracownik p left join
                             terminprzyjec t on p.pesel = t.pracownik_pesel
@@ -69,7 +69,7 @@ class DbDataProvider(object):
         return True
 
     def get_rooms_with_type(self):
-        query = """select g.nr_pietra, g.nr_pokoju, t.nazwa_rodzaju_gabinetu from gabinet g
+        query = """select g.idgab, g.nr_pietra, g.nr_pokoju, t.nazwa_rodzaju_gabinetu from gabinet g
                    left join typgabinetu t on g.TypGabinetu_idTGab = t.idtgab"""
         self.cur.execute(query)
         return self.cur.fetchall()
@@ -95,4 +95,4 @@ if __name__ == "__main__":
     print(provider.get_type_eqs_by_time(3))
     # provider.add_eq(1)
     # provider.add_term_visit(95102812345, "pon", "11:00:00", "12:00:00", 1)
-    print(provider.check_collision(95102812345, 1, datetime.strptime("2000-10-10 10:00:00", "%Y-%m-%d %H:%M:%S")))
+    print(provider.check_collision(95102812345, 1))

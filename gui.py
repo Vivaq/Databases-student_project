@@ -1,5 +1,6 @@
 import gtk
 from dataprovision.db_providers import DbDataProvider
+from datetime import datetime
 
 buy_list = {}
 plan_list = {}
@@ -78,7 +79,7 @@ class GuiApp(gtk.Window):
         self.vbox = gtk.VButtonBox()
         d = {}
         for x in db_conn.get_type_eqs_by_time(days_num):
-            x = x[0] + ' ' + str(x[1])
+            x = str(x[0]) + ' ' + str(x[1])
             d[x] = self.suppliers
         self.add_buttons(d)
 
@@ -88,7 +89,7 @@ class GuiApp(gtk.Window):
         self.remove(self.vb)
         self.vbox = gtk.VButtonBox()
         d = {}
-        for x in db_conn.get_eq_providers_with_eq(buy_list['type'].split(' ')[0]):
+        for x in db_conn.get_eq_providers_with_eq(buy_list['type'].split(' ')[1]):
             x = x[1] + ' ' + str(x[2])
             d[x] = self.finalize
         self.add_buttons(d)
@@ -98,6 +99,7 @@ class GuiApp(gtk.Window):
         self.vb.remove(self.vbox)
         self.remove(self.vb)
         self.vbox = gtk.VButtonBox()
+        db_conn.add_eq(buy_list['type'].split(' ')[0])
         self.add_buttons({'Powodzenie!': self.go_back})
 
     def list_docs(self, widget):
@@ -117,11 +119,12 @@ class GuiApp(gtk.Window):
         self.vbox = gtk.VButtonBox()
         d = {}
         for x in db_conn.get_rooms_with_type():
-            x = str(x[0]) + ' ' + str(x[1]) + ' ' + x[2]
+            x = str(x[0]) + ' ' + str(x[1]) + ' ' + x[2] + ' ' + str(x[3])
             d[x] = self.show_days
         self.add_buttons(d)
 
     def show_days(self, widget):
+        plan_list['room'] = widget.get_label()
         self.vb.remove(self.vbox)
         self.remove(self.vb)
         self.vbox = gtk.VButtonBox()
@@ -137,7 +140,6 @@ class GuiApp(gtk.Window):
         self.add_buttons({'dalej': self.plan})
 
     def plan(self, widget, data=None):
-        plan_list['room'] = widget.get_label()
         self.vb.remove(self.vbox)
         self.remove(self.vb)
         self.vbox = gtk.VButtonBox()
@@ -167,13 +169,19 @@ class GuiApp(gtk.Window):
         for child in enumerate(self.vbox.children()):
             if child[0] % 2 == 1:
                 childs.append(child[1])
-        for child in zip(['day', 'start_h', 'end_h'], child):
+        for child in zip(['day', 'start_h', 'end_h'], childs):
             plan_list[child[0]] = child[1].get_text()
         print plan_list
         self.vb.remove(self.vbox)
         self.remove(self.vb)
         self.vbox = gtk.VButtonBox()
-        if db_conn.check_collision(plan_list[''], plan_list['room']):
+        if db_conn.check_collision(int(plan_list['doc'].split(' ')[2]), plan_list['room'].split(' ')[0], plan_list['day']):
+            db_conn.add_term_visit(int(plan_list['doc'].split(' ')[2]),
+                                   plan_list['day'],
+                                   plan_list['start_h'],
+                                   plan_list['end_h'],
+                                   plan_list['room'].split(' ')[0]
+                                   )
             self.add_buttons({'Powodzenie!': self.go_back})
         else:
 
