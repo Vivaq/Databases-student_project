@@ -18,9 +18,9 @@ class DbDataProvider(object):
         return self.cur.fetchall()
 
     def get_eq_providers_with_eq(self, eq):
-        query = """	select t.nazwa_typu, d.nazwa_firmy, d.nip
+        query = """	select t.nazwa_typu, d.nazwa_firmy, d.nip, du.cena
                     from typurzadzenia t join typurzdos du on du.TypUrzadzenia_idTUr = t.idTUr
-                    join DostawcaSprzetu d on du.DostawcaSprzetu_idD = d.idD
+                    join DostawcaSprzetu d on du.DostawcaSprzetu_nip = d.nip
                     where t.nazwa_typu = """ + "'" + eq + "'"
         self.cur.execute(query)
         return self.cur.fetchall()
@@ -70,7 +70,7 @@ class DbDataProvider(object):
 if __name__ == "__main__":
     provider = DbDataProvider()
     print(provider.get_doctors_with_type())
-    print(provider.get_pref_hours_doctor(1))
+    print(provider.get_pref_hours_doctor(95102812345))
     print(provider.get_eq_providers_with_eq("stroboskop"))
-    print(provider.get_eq_providers_with_eq("kardiogram"))
+    print(provider.get_eq_providers_with_eq("Kardiogram"))
     print(provider.get_rooms_with_type())
